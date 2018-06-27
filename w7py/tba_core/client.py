@@ -8,16 +8,26 @@ import requests
 
 from const import *
 
-__all__ = ["TBAClient"]
+__all__ = ["TBAClient", "TBANoCacheAvailableException"]
+
+
+class TBANoCacheAvailableException(Exception):
+    pass
+
+
+class TBASessionAlreadyUsedException(Exception):
+    pass
 
 
 class CachedSession:
     def __init__(self, parent_client: "TBAClient"):
         self.__parent_client = parent_client
+        self.__session_already_set = False
         self.is_connectible = True
         self.online_only = False
         self.session_cache = {}
         self.session_name = ""
+        self.no_cache_value = "empty_dict"
 
     def __getattr__(self, item) -> "dict":
         if self.online_only:
@@ -25,6 +35,8 @@ class CachedSession:
         if item in self.session_cache.keys():
             return self.session_cache[item]
         if not self.is_connectible:
+            if self.no_cache_value == "raise":
+                raise TBANoCacheAvailableException("No cache for query '{}'".format(item))
             return {}
         res = self.__parent_client.raw_json(item)
         self.session_cache[item] = res
@@ -32,8 +44,13 @@ class CachedSession:
 
     def set_session(self, name: "str" = ""):
         if type(name) is str and name.isalnum():
-            self.session_name = name
-            self.session_cache = self.__parent_client.load_cache_data(name)
+            if not self.__session_already_set:
+                self.session_name = name
+                self.session_cache = self.__parent_client.load_cache_data(name)
+                self.__session_already_set = True
+            else:
+                raise TBASessionAlreadyUsedException("Session already set for {}"
+                                                     .format(self.session_name))
 
 
 class TBAClient:
@@ -73,7 +90,8 @@ class TBAClient:
 
     @contextmanager
     def cached_session(self,
-                       online_only: "bool" = False):
+                       online_only: "bool" = False,
+                       no_cache_value="empty_dict"):
         _connection_test_ip = 'http://216.58.192.142'
         _connection_test_query = "team/frc865"
         is_connectible = True
@@ -97,6 +115,7 @@ class TBAClient:
         session = CachedSession(self)
         session.is_connectible = is_connectible
         session.online_only = online_only
+        session.no_cache_value = no_cache_value
         yield session
         res_name = session.session_name
         if res_name:
