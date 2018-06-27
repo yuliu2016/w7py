@@ -7,36 +7,48 @@ import requests
 
 from const import *
 
+_connection_test_ip = 'http://216.58.192.142'
+_connection_test_query = "team/frc865"
 
-class CachedTBASession:
+
+class TBASession:
 
     def __init__(self, use_cache=True, cache_dir="default"):
         self.auth_key = ""
         self.use_cache = use_cache
         self.tba_key_checked = False
-        if cache_dir == "default":
-            self.cache_dir = os.path.join(os.getcwd(), DIR_PREFIX_TBA_CACHE)
-        else:
-            if os.path.exists(cache_dir):
-                self.cache_dir = cache_dir
+        self.cache = {}
+        if self.use_cache:
+            if cache_dir == "default":
+                self.cache_dir = os.path.join(os.getcwd(), DIR_PREFIX_TBA_CACHE)
             else:
-                raise NotADirectoryError("Cache directory does not exist")
-        dir_cont = os.listdir(self.cache_dir)
-        if TBA_CACHE_PICKLE in dir_cont:
-            cache_fp = os.path.join(self.cache_dir, TBA_CACHE_PICKLE)
-            with open(cache_fp, "rb") as cache_file:
-                self.cache = pickle.load(cache_file)
-        elif TBA_CACHE_JSON in dir_cont:
-            cache_fp = os.path.join(self.cache_dir, TBA_CACHE_JSON)
-            with open(cache_fp, "r") as cache_file:
-                self.cache = json.load(cache_file)
-        else:
-            self.cache = {}
+                if os.path.exists(cache_dir):
+                    self.cache_dir = cache_dir
+                else:
+                    raise NotADirectoryError("Cache directory does not exist")
+            self.load_cache()
+
+    def load_cache(self):
+        if self.use_cache:
+            dir_cont = os.listdir(self.cache_dir)
+            if TBA_CACHE_PICKLE in dir_cont:
+                cache_fp = os.path.join(self.cache_dir, TBA_CACHE_PICKLE)
+                with open(cache_fp, "rb") as cache_file:
+                    self.cache = pickle.load(cache_file)
+            elif TBA_CACHE_JSON in dir_cont:
+                cache_fp = os.path.join(self.cache_dir, TBA_CACHE_JSON)
+                with open(cache_fp, "r") as cache_file:
+                    self.cache = json.load(cache_file)
 
     def save_cache(self):
+        json_fp = os.path.join(self.cache_dir, TBA_CACHE_JSON)
+        pickle_fp = os.path.join(self.cache_dir, TBA_CACHE_PICKLE)
+        if not self.cache:  # File need to be removed here due to clear_cache
+            if os.path.exists(json_fp):
+                os.remove(json_fp)
+            if os.path.exists(pickle_fp):
+                os.remove(pickle_fp)
         if self.use_cache:
-            json_fp = os.path.join(self.cache_dir, TBA_CACHE_JSON)
-            pickle_fp = os.path.join(self.cache_dir, TBA_CACHE_PICKLE)
             with open(json_fp, "w") as json_file:
                 json.dump(self.cache, json_file, indent=4)
             with open(pickle_fp, "wb") as pickle_file:
@@ -68,8 +80,8 @@ class CachedTBASession:
     def check_tba_keyed_connection(self):
         if self.auth_key:
             try:
-                urllib_request.urlopen('http://216.58.192.142', timeout=1)  # Test for the connection
-                res = self._raw_json("team/frc865")
+                urllib_request.urlopen(_connection_test_ip, timeout=1)  # Test for the connection
+                res = self._raw_json(_connection_test_query)
                 if len(res.keys()) == 1:
                     raise requests.RequestException("The TBA Key is incorrect!!")
             except urllib_request.URLError:

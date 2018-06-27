@@ -1,3 +1,3 @@
-from .session import CachedTBASession as tba
+from .session import TBASession as tba
 
 __all__ = ["tba"]
