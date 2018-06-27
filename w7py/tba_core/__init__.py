@@ -1,3 +1,5 @@
-from .session import TBASession as tba
+from .session import TBASession
 
-__all__ = ["tba"]
+tba_session = TBASession
+
+__all__ = ["tba_session"]
