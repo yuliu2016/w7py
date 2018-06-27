@@ -1,0 +1,7 @@
+requests
+numpy
+pandas
+TBAPy
+OpenPyXL
+SQLAlchemy
+wheel
