@@ -8,6 +8,33 @@ import requests
 
 from const import *
 
+__all__ = ["TBAClient"]
+
+
+class CachedSession:
+    def __init__(self, parent_client: "TBAClient"):
+        self.__parent_client = parent_client
+        self.is_connectible = True
+        self.online_only = False
+        self.session_cache = {}
+        self.session_name = ""
+
+    def __getattr__(self, item) -> "dict":
+        if self.online_only:
+            return self.__parent_client.raw_json(item)
+        if item in self.session_cache.keys():
+            return self.session_cache[item]
+        if not self.is_connectible:
+            return {}
+        res = self.__parent_client.raw_json(item)
+        self.session_cache[item] = res
+        return res
+
+    def set_session(self, name: "str" = ""):
+        if type(name) is str and name.isalnum():
+            self.session_name = name
+            self.session_cache = self.__parent_client.load_cache_data(name)
+
 
 class TBAClient:
 
@@ -38,33 +65,38 @@ class TBAClient:
         return (json_path, json_exists), (pkl_path, pkl_exists)
 
     def load_cache_data(self, session_name):
-        (json_path, json_exists), (pkl_path, pkl_exists) = self.compute_paths(session_name)
-        loaded_cache = {}
+        _, (pkl_path, pkl_exists) = self.compute_paths(session_name)
         if pkl_exists:
             with open(pkl_path, "rb") as pickle_cache:
-                loaded_cache = pickle.load(pickle_cache)
-        elif json_exists:
-            with open(json_path, "r") as json_cache:
-                loaded_cache = json.load(json_cache)
-        return loaded_cache
+                return pickle.load(pickle_cache)
+        return {}
 
     @contextmanager
     def cached_session(self,
-                       offline_only: "bool" = False):
+                       online_only: "bool" = False):
         _connection_test_ip = 'http://216.58.192.142'
         _connection_test_query = "team/frc865"
-        if not offline_only:
-            if self.auth_key:
-                try:
-                    urllib_request.urlopen(_connection_test_ip, timeout=1)  # Test for internet connection
-                except urllib_request.URLError:
+        is_connectible = True
+        if self.auth_key:
+            try:
+                urllib_request.urlopen(_connection_test_ip, timeout=1)  # Test for internet connection
+            except urllib_request.URLError:
+                is_connectible = False
+                if online_only:
                     raise requests.ConnectionError("Cannot Connect to the Internet")
+            if is_connectible:
                 res = self.raw_json(_connection_test_query)  # Test for the Blue Alliance connection
                 if len(res.keys()) == 1:
-                    raise requests.RequestException("The TBA Key is incorrect!!")
-            else:
+                    is_connectible = False
+                    if online_only:
+                        raise requests.RequestException("The TBA Key is incorrect!!")
+        else:
+            is_connectible = False
+            if online_only:
                 raise ValueError("No TBA key set. Get one from the website!")
         session = CachedSession(self)
+        session.is_connectible = is_connectible
+        session.online_only = online_only
         yield session
         res_name = session.session_name
         if res_name:
@@ -80,22 +112,3 @@ class TBAClient:
                     json.dump(res_cache, json_file, indent=4)
                 with open(pkl_path, "wb") as pickle_file:
                     pickle.dump(res_cache, pickle_file)
-
-
-class CachedSession:
-    def __init__(self, parent_client: "TBAClient"):
-        self.__parent_client = parent_client
-        self.session_cache = {}
-        self.session_name = ""
-
-    def __getattr__(self, item):
-        if item in self.session_cache.keys():
-            return self.session_cache[item]
-        res = self.__parent_client.raw_json(item)
-        self.session_cache[item] = res
-        return res
-
-    def set_session(self, name: "str" = ""):
-        if type(name) is str and name.isalnum():
-            self.session_name = name
-            self.session_cache = self.__parent_client.load_cache_data(name)
