@@ -1,20 +1,14 @@
 import json
-import pickle
 import os
+import pickle
 from urllib import request as urllib_request
+
 import requests
+
 from const import *
 
 
-class CachedTBAClient:
-
-    @staticmethod
-    def check_connection():
-        try:
-            urllib_request.urlopen('http://216.58.192.142', timeout=1)
-            return True
-        except urllib_request.URLError:
-            return False
+class CachedTBASession:
 
     def __init__(self, use_cache=True, cache_dir="default"):
         self.auth_key = ""
@@ -40,12 +34,13 @@ class CachedTBAClient:
             self.cache = {}
 
     def save_cache(self):
-        json_fp = os.path.join(self.cache_dir, TBA_CACHE_JSON)
-        pickle_fp = os.path.join(self.cache_dir, TBA_CACHE_PICKLE)
-        with open(json_fp, "w") as json_file:
-            json.dump(self.cache, json_file, indent=4)
-        with open(pickle_fp, "wb") as pickle_file:
-            pickle.dump(self.cache, pickle_file)
+        if self.use_cache:
+            json_fp = os.path.join(self.cache_dir, TBA_CACHE_JSON)
+            pickle_fp = os.path.join(self.cache_dir, TBA_CACHE_PICKLE)
+            with open(json_fp, "w") as json_file:
+                json.dump(self.cache, json_file, indent=4)
+            with open(pickle_fp, "wb") as pickle_file:
+                pickle.dump(self.cache, pickle_file)
 
     def get_request_headers(self):
         return {'X-TBA-Auth-Key': self.auth_key}
@@ -72,11 +67,12 @@ class CachedTBAClient:
 
     def check_tba_keyed_connection(self):
         if self.auth_key:
-            if self.check_connection():
+            try:
+                urllib_request.urlopen('http://216.58.192.142', timeout=1)  # Test for the connection
                 res = self._raw_json("team/frc865")
                 if len(res.keys()) == 1:
                     raise requests.RequestException("The TBA Key is incorrect!!")
-            else:
+            except urllib_request.URLError:
                 raise requests.ConnectionError("Cannot Connect to the Internet")
         else:
             raise ValueError("No TBA key set. Get one from the website!")
