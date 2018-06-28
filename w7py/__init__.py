@@ -1,5 +1,5 @@
-import tba_core as tba
-from .indexers import *
+import tba3 as tba
+from .ixr import *
 
 __all__ = ["match_",
            "team_",

@@ -1,7 +1,9 @@
 requests
 numpy
+scipy
+matplotlib
 pandas
-TBAPy
-OpenPyXL
-SQLAlchemy
+tbapy
+openpyxl
+sqlalchemy
 wheel

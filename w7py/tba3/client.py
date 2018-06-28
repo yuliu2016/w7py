@@ -43,6 +43,9 @@ class TBACachedSession:
                 raise TBASessionAlreadyUsedException("Session already set for {}"
                                                      .format(self.session_name))
 
+    def clear_cache(self):
+        self.session_cache = {}
+
 
 class TBAClient:
 
@@ -84,7 +87,7 @@ class TBAClient:
                        online_only: "bool" = False,
                        no_cache_value: "str" = "empty_dict",
                        connection_test_ip='http://216.58.192.142',
-                       connection_test_query="team/frc865"):
+                       connection_test_query="/team/frc865"):
         is_connectible = True
         if self.auth_key:
             try:
