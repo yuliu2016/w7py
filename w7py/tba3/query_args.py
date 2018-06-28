@@ -19,4 +19,4 @@ class TBAQueryArguments:
         return "-".join(self.tba_args[key] for key in sorted(self.tba_args.keys()) if key in ARGS_KEYS)
 
     def __bool__(self):
-        return bool(self.tba_args)
+        return bool(list(key for key in self.tba_args.keys() if key in ARGS_KEYS))

@@ -59,6 +59,8 @@ class TBAClient:
 
     @contextmanager
     def cached_session(self,
+                       write_json: "bool" = True,
+                       overwrite_id: "str" = "",
                        online_only: "bool" = False,
                        no_cache_value: "str" = "empty_dict",
                        existing_args=None,
@@ -87,14 +89,16 @@ class TBAClient:
             q_args = existing_args
         else:
             q_args = TBAQueryArguments(**preset_tba_args)
-        if q_args:
+        if overwrite_id:
+            session_id = overwrite_id
+        elif q_args:
             session_id = str(q_args)
         else:
             session_id = "main"
         if not os.path.exists(self.cache_directory):
             os.makedirs(self.cache_directory)
         json_path = os.path.join(self.cache_directory, "{}.json".format(session_id))
-        pkl_path = os.path.join(self.cache_directory, "{}.pkl".format(session_id))
+        pkl_path = os.path.join(self.cache_directory, "${}.pkl".format(session_id))
         pkl_exists = os.path.exists(pkl_path)
         json_exists = os.path.exists(json_path)
         loaded_cache = {}
@@ -110,10 +114,11 @@ class TBAClient:
         yield session
         res_cache = session.session_cache
         if res_cache:
-            with open(json_path, "w") as json_file:
-                json.dump(res_cache, json_file, indent=4)
             with open(pkl_path, "wb") as pickle_file:
                 pickle.dump(res_cache, pickle_file)
+            if write_json:
+                with open(json_path, "w") as json_file:
+                    json.dump(res_cache, json_file, indent=2)
         else:  # File need to be removed here due to clear_cache
             if json_exists:
                 os.remove(json_path)
