@@ -1,4 +1,7 @@
-from .const import *
+import tba_core as tba
 from .indexers import *
 
-__all__ = ["match_", "team_", "event_", "DIR_PREFIX"]
+__all__ = ["match_",
+           "team_",
+           "event_",
+           "tba"]

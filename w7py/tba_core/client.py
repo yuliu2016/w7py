@@ -7,19 +7,10 @@ from urllib import request as urllib_request
 import requests
 
 from const import *
-
-__all__ = ["TBAClient", "TBANoCacheAvailableException"]
-
-
-class TBANoCacheAvailableException(Exception):
-    pass
+from .exceptions import *
 
 
-class TBASessionAlreadyUsedException(Exception):
-    pass
-
-
-class CachedSession:
+class TBACachedSession:
     def __init__(self, parent_client: "TBAClient"):
         self.__parent_client = parent_client
         self.__session_already_set = False
@@ -63,7 +54,7 @@ class TBAClient:
     def set_key(self, key):
         self.auth_key = key
 
-    def set_cache(self, cache_directory):
+    def set_cache(self, cache_directory: "str"):
         self.cache_directory = os.path.join(cache_directory, DIR_PREFIX_TBA_CACHE)
 
     def get_request_headers(self):
@@ -91,19 +82,19 @@ class TBAClient:
     @contextmanager
     def cached_session(self,
                        online_only: "bool" = False,
-                       no_cache_value="empty_dict"):
-        _connection_test_ip = 'http://216.58.192.142'
-        _connection_test_query = "team/frc865"
+                       no_cache_value: "str" = "empty_dict",
+                       connection_test_ip='http://216.58.192.142',
+                       connection_test_query="team/frc865"):
         is_connectible = True
         if self.auth_key:
             try:
-                urllib_request.urlopen(_connection_test_ip, timeout=1)  # Test for internet connection
+                urllib_request.urlopen(connection_test_ip, timeout=1)  # Test for internet connection
             except urllib_request.URLError:
                 is_connectible = False
                 if online_only:
                     raise requests.ConnectionError("Cannot Connect to the Internet")
             if is_connectible:
-                res = self.raw_json(_connection_test_query)  # Test for the Blue Alliance connection
+                res = self.raw_json(connection_test_query)  # Test for the Blue Alliance connection
                 if len(res.keys()) == 1:
                     is_connectible = False
                     if online_only:
@@ -112,7 +103,7 @@ class TBAClient:
             is_connectible = False
             if online_only:
                 raise ValueError("No TBA key set. Get one from the website!")
-        session = CachedSession(self)
+        session = TBACachedSession(self)
         session.is_connectible = is_connectible
         session.online_only = online_only
         session.no_cache_value = no_cache_value
@@ -131,3 +122,6 @@ class TBAClient:
                     json.dump(res_cache, json_file, indent=4)
                 with open(pkl_path, "wb") as pickle_file:
                     pickle.dump(res_cache, pickle_file)
+
+
+client_instance = TBAClient()
