@@ -4,3 +4,7 @@ class TBANoCacheAvailableException(Exception):
 
 class TBASessionAlreadyUsedException(Exception):
     pass
+
+
+class TBARequiredArgumentNotSpecified(KeyError):
+    pass
