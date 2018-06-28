@@ -6,56 +6,11 @@ from urllib import request as urllib_request
 
 import requests
 
-from const import *
 from .exceptions import *
 from .query_args import *
 
 
-class TBACachedSession:
-    def __init__(self, parent_client: "TBAClient"):
-        self.__parent_client = parent_client
-        self.is_connectible = True
-        self.online_only = False
-        self.session_cache = {}
-        self.session_name = ""
-        self.no_cache_value = "empty_dict"
-        self.query_args = None
-
-    def __getattr__(self, item) -> "dict":
-        if self.online_only:
-            return self.__parent_client.raw_json(item)
-        if item in self.session_cache.keys():
-            return self.session_cache[item]
-        if not self.is_connectible:
-            if self.no_cache_value == "raise":
-                raise TBANoCacheAvailableException("No cache for query '{}'".format(item))
-            return {}
-        res = self.__parent_client.raw_json(item)
-        self.session_cache[item] = res
-        return res
-
-    def clear_cache(self):
-        self.session_cache = {}
-
-
 class TBAClient:
-
-    def __init__(self):
-        self.auth_key = ''
-        self.cache_directory = ''
-        self.set_cache(os.getcwd())
-
-    def set_key(self, key):
-        self.auth_key = key
-
-    def set_cache(self, cache_directory: "str"):
-        self.cache_directory = os.path.join(cache_directory, DIR_PREFIX_TBA_CACHE)
-
-    def get_request_headers(self):
-        return {'X-TBA-Auth-Key': self.auth_key}
-
-    def raw_json(self, url: "str") -> "dict":
-        return requests.get(TBA_BASE_URL + url, headers=self.get_request_headers()).json()
 
     @contextmanager
     def cached_session(self,
@@ -65,6 +20,17 @@ class TBAClient:
                        no_cache_value: "str" = "empty_dict",
                        existing_args=None,
                        **preset_tba_args):
+        """
+        Creates a cached session to access the TBA API
+        :param write_json: whether the json file should be made (may slow down slightly)
+        :param overwrite_id: specifies the session id to overwrite (especially for testing)
+        :param online_only: specifies raising an error if not connected
+        :param no_cache_value: specifies the value to return if no cache is found, or "raise" to raise exception
+        :param existing_args: if not None, specifies a previous argument set
+        :param preset_tba_args: query arguments that will union with newer arguments when requested,
+               and includes "team_key", "district_key", "match_key", "event_key", "year", "media_tag", "page_num"
+        :return: A context managed object to be used for TBA requests
+        """
         connection_test_ip: "str" = 'http://216.58.192.142'
         connection_test_tba_query: "str" = "/team/frc865"
         is_connectible = True
@@ -97,9 +63,9 @@ class TBAClient:
             session_id = "main"
         if not os.path.exists(self.cache_directory):
             os.makedirs(self.cache_directory)
-        json_path = os.path.join(self.cache_directory, "{}.json".format(session_id))
         pkl_path = os.path.join(self.cache_directory, "${}.pkl".format(session_id))
         pkl_exists = os.path.exists(pkl_path)
+        json_path = os.path.join(self.cache_directory, "{}.json".format(session_id))
         json_exists = os.path.exists(json_path)
         loaded_cache = {}
         if pkl_exists:
@@ -124,6 +90,53 @@ class TBAClient:
                 os.remove(json_path)
             if pkl_exists:
                 os.remove(pkl_path)
+
+    def __init__(self):
+        self.auth_key = ''
+        self.cache_directory = ''
+        self.set_cache(os.getcwd())
+
+    def set_key(self, key):
+        self.auth_key = key
+
+    def set_cache(self, cache_directory: "str"):
+        self.cache_directory = os.path.join(cache_directory, self.DIR_PREFIX_TBA_CACHE)
+
+    def get_request_headers(self):
+        return {'X-TBA-Auth-Key': self.auth_key}
+
+    def raw_json(self, url: "str") -> "dict":
+        return requests.get(self.TBA_BASE_URL + url, headers=self.get_request_headers()).json()
+
+    TBA_BASE_URL = "https://www.thebluealliance.com/api/v3"
+    DIR_PREFIX_TBA_CACHE = "w7/.tba-cache/"
+
+
+class TBACachedSession:
+    def __init__(self, parent_client: "TBAClient"):
+        self.__parent_client = parent_client
+        self.is_connectible = True
+        self.online_only = False
+        self.session_cache = {}
+        self.session_name = ""
+        self.no_cache_value = "empty_dict"
+        self.query_args = None
+
+    def __getattr__(self, item) -> "dict":
+        if self.online_only:
+            return self.__parent_client.raw_json(item)
+        if item in self.session_cache.keys():
+            return self.session_cache[item]
+        if not self.is_connectible:
+            if self.no_cache_value == "raise":
+                raise TBANoCacheAvailableException("No cache for query '{}'".format(item))
+            return {}
+        res = self.__parent_client.raw_json(item)
+        self.session_cache[item] = res
+        return res
+
+    def clear_cache(self):
+        self.session_cache = {}
 
 
 client_instance = TBAClient()
