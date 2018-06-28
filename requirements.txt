@@ -3,7 +3,6 @@ numpy
 scipy
 matplotlib
 pandas
-tbapy
 openpyxl
 sqlalchemy
 wheel
