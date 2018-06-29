@@ -5,7 +5,7 @@ class _APIQueryDecorationWrapper:
 
     @classmethod
     def query(cls, query_url_function):
-        def fetch_query(self: "TBARawAPI", *_, **kwargs):
+        def fetch_query(self: "TBARawAPI", *_, **kwargs) -> "dict":
             url = self.session.query_args.create_url(query_url_function(self), **kwargs)
             return getattr(self.session, url)
 
@@ -18,12 +18,89 @@ class TBARawAPI:
     def __init__(self, session: "TBACachedSession"):
         self.session = session
 
-    # def q(self, query, args):
-    #     return getattr(self.session, self.session.query_args.create_url(query, **args))
-
     @_query
     def status(self):
         return "/status"
+
+    @_query
+    def teams_by_page_num(self):
+        return "/team/{page_num}"
+
+    @_query
+    def teams_by_page_num_simple(self):
+        return "/team/{page_num}/simple"
+
+    @_query
+    def teams_by_page_num_keys(self):
+        return "/team/{page_num}/keys"
+
+    @_query
+    def teams_in_year_by_page_num(self):
+        return "/team/{year}/{page_num}"
+
+    @_query
+    def teams_in_year_by_page_num_simple(self):
+        return "/team/{year}/{page_num}/simple"
+
+    @_query
+    def teams_in_year_by_page_num_keys(self):
+        return "/team/{year}/{page_num}/keys"
+
+    @_query
+    def team(self):
+        return "/team/{team_key}"
+
+    @_query
+    def team_simple(self):
+        return "/team/{team_key}"
+
+    @_query
+    def team_years_participated(self):
+        return "/team/{team_key}"
+
+    @_query
+    def team_districts(self):
+        return "/team/{team_key}"
+
+    @_query
+    def team_robots(self):
+        return "/team/{team_key}"
+
+    @_query
+    def team_awards(self):
+        return "/team/{team_key}/awards"
+
+    @_query
+    def team_awards_year(self):
+        return "/team/{team_key}/awards/{year}"
+
+    @_query
+    def team_matches_in_year(self):
+        return "/team/{team_key}/matches/{year}"
+
+    @_query
+    def team_matches_in_year_simple(self):
+        return "/team/{team_key}/matches/{year}/simple"
+
+    @_query
+    def team_matches_in_year_keys(self):
+        return "/team/{team_key}/matches/{year}/keys"
+
+    @_query
+    def team_media_in_year(self):
+        return "/team/{team_key}/media/{year}"
+
+    @_query
+    def team_media_by_tag(self):
+        return "/team/{team_key}/media/tag/{media_tag}"
+
+    @_query
+    def team_media_by_tag_in_year(self):
+        return "/team/{team_key}/media/tag/{media_tag}/{year}"
+
+    @_query
+    def team_social_media(self):
+        return "/team/{team_key}/social_media"
 
     @_query
     def team_events(self):
@@ -99,15 +176,15 @@ class TBARawAPI:
 
     @_query
     def event_insights(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/insights"
 
     @_query
     def event_oprs(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/oprs"
 
     @_query
     def event_predictions(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/predictions"
 
     @_query
     def event_rankings(self):
@@ -119,39 +196,39 @@ class TBARawAPI:
 
     @_query
     def event_teams(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/teams"
 
     @_query
     def event_teams_simple(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/teams/simple"
 
     @_query
     def event_teams_keys(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/teams/keys"
 
     @_query
     def event_teams_statuses(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/teams/statuses"
 
     @_query
     def event_matches(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/matches"
 
     @_query
     def event_matches_simple(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/matches/simple"
 
     @_query
     def event_matches_keys(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/matches/keys"
 
     @_query
     def event_matches_timeseries(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/matches/timeseries"
 
     @_query
     def event_awards(self):
-        return "/event/{event_key}"
+        return "/event/{event_key}/awards"
 
     @_query
     def district_events(self):
