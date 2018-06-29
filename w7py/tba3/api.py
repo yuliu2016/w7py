@@ -18,9 +18,13 @@ class TBARawAPI:
     def __init__(self, session: "TBACachedSession"):
         self.session = session
 
+    # Status
+
     @_query
     def status(self):
         return "/status"
+
+    # Teams/Team API
 
     @_query
     def teams_by_page_num(self):
@@ -150,6 +154,8 @@ class TBARawAPI:
     def team_event_status(self):
         return "/team/{team_key}/event/{event_key}/status"
 
+    # Event API
+
     @_query
     def events_in_year(self):
         return "/events/{year}"
@@ -229,6 +235,26 @@ class TBARawAPI:
     @_query
     def event_awards(self):
         return "/event/{event_key}/awards"
+
+    # Match API
+
+    @_query
+    def match(self):
+        return "/match/{match_key}"
+
+    @_query
+    def match_simple(self):
+        return "/match/{match_key}/simple"
+
+    @_query
+    def match_timeseries(self):
+        return "/match/{match_key}/timeseries"
+
+    # District API
+
+    @_query
+    def districts_in_year(self):
+        return "/districts/{year}"
 
     @_query
     def district_events(self):
