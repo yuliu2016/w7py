@@ -24,27 +24,27 @@ class TBARawAPI:
 
     @_query
     def teams_by_page_num(self):
-        return "/team/{page_num}"
+        return "/teams/{page_num}"
 
     @_query
     def teams_by_page_num_simple(self):
-        return "/team/{page_num}/simple"
+        return "/teams/{page_num}/simple"
 
     @_query
     def teams_by_page_num_keys(self):
-        return "/team/{page_num}/keys"
+        return "/teams/{page_num}/keys"
 
     @_query
     def teams_in_year_by_page_num(self):
-        return "/team/{year}/{page_num}"
+        return "/teams/{year}/{page_num}"
 
     @_query
     def teams_in_year_by_page_num_simple(self):
-        return "/team/{year}/{page_num}/simple"
+        return "/teams/{year}/{page_num}/simple"
 
     @_query
     def teams_in_year_by_page_num_keys(self):
-        return "/team/{year}/{page_num}/keys"
+        return "/teams/{year}/{page_num}/keys"
 
     @_query
     def team(self):
@@ -241,3 +241,19 @@ class TBARawAPI:
     @_query
     def district_events_keys(self):
         return "/district/{district_key}/events/keys"
+
+    @_query
+    def district_teams(self):
+        return "/district/{district_key}/teams"
+
+    @_query
+    def district_teams_simple(self):
+        return "/district/{district_key}/teams/simple"
+
+    @_query
+    def district_teams_keys(self):
+        return "/district/{district_key}/teams/keys"
+
+    @_query
+    def district_rankings(self):
+        return "/district/{district_key}/rankings"

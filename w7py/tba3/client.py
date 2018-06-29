@@ -149,7 +149,7 @@ class TBAQueryArguments:
         try:
             return query_template.format(**new_args)
         except KeyError as err:
-            raise TBARequiredArgumentNotSpecified("Argument " + str(err) + " was not specified")
+            raise TBARequiredArgumentNotSpecified("Required Argument " + str(err) + " was not specified")
 
     def __str__(self):
         return "-".join(self.tba_args[key] for key in sorted(self.tba_args.keys()) if key in self.ARGS_KEYS)
