@@ -18,7 +18,7 @@ class TBAClient:
                        online_only: "bool" = False,
                        no_cache_value: "str" = "empty_dict",
                        existing_args=None,
-                       **preset_tba_args):
+                       **preset_tba_args: "str"):
         """
         Creates a cached session to access the TBA API
         :param write_json: whether the json file should be made (may slow down slightly)

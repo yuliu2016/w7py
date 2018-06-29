@@ -1,7 +1,7 @@
-import tba3
-from .ixr import *
+import tba_v3
+from .ix import *
 
-tba = tba3
+tba = tba_v3
 
 __all__ = ["match_",
            "team_",

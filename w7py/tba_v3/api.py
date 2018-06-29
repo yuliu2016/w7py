@@ -6,8 +6,8 @@ class _APIQueryDecorationWrapper:
     @classmethod
     def query(cls, query_url_function):
         def fetch_query(self: "TBARawAPI", *_, **kwargs) -> "dict":
-            url = self.session.query_args.create_url(query_url_function(self), **kwargs)
-            return getattr(self.session, url)
+            url = self._session.query_args.create_url(query_url_function(self), **kwargs)
+            return getattr(self._session, url)
 
         return fetch_query
 
@@ -16,7 +16,7 @@ class TBARawAPI:
     _query = _APIQueryDecorationWrapper.query
 
     def __init__(self, session: "TBACachedSession"):
-        self.session = session
+        self._session = session
 
     # Status
 

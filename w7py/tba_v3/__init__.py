@@ -1,9 +1,8 @@
-from .client import TBAClient as _TBAClient
 from .client import client_instance as _i
 from .exceptions import *
 
 __all__ = ["TBANoCacheAvailableException",
-           "TBASessionAlreadyUsedException",
+           "TBARequiredArgumentNotSpecified",
            "set_key",
            "set_cache",
            "cached_session"]
