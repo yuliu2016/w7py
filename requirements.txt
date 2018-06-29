@@ -6,3 +6,5 @@ pandas
 openpyxl
 sqlalchemy
 wheel
+pywin32
+xlwings

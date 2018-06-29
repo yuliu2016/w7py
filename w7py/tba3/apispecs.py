@@ -67,7 +67,6 @@ tba_queries = (
     "/event/{event_key}/predictions",
     "/event/{event_key}/rankings",
     "/event/{event_key}/district_points",
-    "/event/{event_key}/simple",
 
     "/event/{event_key}/teams{simple_or_keys}",
     "/event/{event_key}/teams/statuses",

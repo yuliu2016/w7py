@@ -119,7 +119,7 @@ class TBACachedSession:
         self.session_cache = {}
         self.session_name = ""
         self.no_cache_value = "empty_dict"
-        self.query_args = None
+        self.query_args: "TBAQueryArguments" = None
 
     def __getattr__(self, item) -> "dict":
         if self.online_only:
