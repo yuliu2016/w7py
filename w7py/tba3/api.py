@@ -5,130 +5,162 @@ class _APIQueryDecorationWrapper:
 
     @classmethod
     def query(cls, query_url_function):
-        def fetch_query(self: "TBABaseAPI", **kwargs):
+        def fetch_query(self: "TBARawAPI", *_, **kwargs):
             url = self.session.query_args.create_url(query_url_function(self), **kwargs)
             return getattr(self.session, url)
 
         return fetch_query
 
 
-class TBABaseAPI:
-    query = _APIQueryDecorationWrapper.query
+class TBARawAPI:
+    _query = _APIQueryDecorationWrapper.query
 
     def __init__(self, session: "TBACachedSession"):
         self.session = session
 
-    def q(self, query, args):
-        return getattr(self.session, self.session.query_args.create_url(query, **args))
+    # def q(self, query, args):
+    #     return getattr(self.session, self.session.query_args.create_url(query, **args))
 
-    @query
-    def test(self):
+    @_query
+    def status(self):
         return "/status"
 
-    def status(self):
-        return self.q("/status", {})
+    @_query
+    def team_events(self):
+        return "/team/{team_key}/events"
 
-    def team_events(self, **kw):
-        return self.q("/team/{team_key}/events", kw)
+    @_query
+    def team_events_simple(self):
+        return "/team/{team_key}/events/simple"
 
-    def team_events_simple(self, **kw):
-        return self.q("/team/{team_key}/events/simple", kw)
+    @_query
+    def team_events_keys(self):
+        return "/team/{team_key}/events/keys"
 
-    def team_events_keys(self, **kw):
-        return self.q("/team/{team_key}/events/keys", kw)
+    @_query
+    def team_events_in_year(self):
+        return "/team/{team_key}/events/{year}"
 
-    def team_events_in_year(self, **kw):
-        return self.q("/team/{team_key}/events/{year}", kw)
+    @_query
+    def team_events_in_year_simple(self):
+        return "/team/{team_key}/events/{year}/simple"
 
-    def team_events_in_year_simple(self, **kw):
-        return self.q("/team/{team_key}/events/{year}/simple", kw)
+    @_query
+    def team_events_in_year_keys(self):
+        return "/team/{team_key}/events/{year}/keys"
 
-    def team_events_in_year_keys(self, **kw):
-        return self.q("/team/{team_key}/events/{year}/keys", kw)
+    @_query
+    def team_events_in_year_statuses(self):
+        return "/team/{team_key}/events/{year}/statuses"
 
-    def team_events_in_year_statuses(self, **kw):
-        return self.q("/team/{team_key}/events/{year}/statuses", kw)
+    @_query
+    def team_event_matches(self):
+        return "/team/{team_key}/event/{event_key}/matches"
 
-    def team_event_matches(self, **kw):
-        return self.q("/team/{team_key}/event/{event_key}/matches", kw)
+    @_query
+    def team_event_matches_simple(self):
+        return "/team/{team_key}/event/{event_key}/matches/simple"
 
-    def team_event_matches_simple(self, **kw):
-        return self.q("/team/{team_key}/event/{event_key}/matches/simple", kw)
+    @_query
+    def team_event_matches_keys(self):
+        return "/team/{team_key}/event/{event_key}/matches/keys"
 
-    def team_event_matches_keys(self, **kw):
-        return self.q("/team/{team_key}/event/{event_key}/matches/keys", kw)
+    @_query
+    def team_event_awards(self):
+        return "/team/{team_key}/event/{event_key}/awards"
 
-    def team_event_awards(self, **kw):
-        return self.q("/team/{team_key}/event/{event_key}/awards", kw)
+    @_query
+    def team_event_status(self):
+        return "/team/{team_key}/event/{event_key}/status"
 
-    def team_event_status(self, **kw):
-        return self.q("/team/{team_key}/event/{event_key}/status", kw)
+    @_query
+    def events_in_year(self):
+        return "/events/{year}"
 
-    def events_in_year(self, **kw):
-        return self.q("/events/{year}", kw)
+    @_query
+    def events_in_year_simple(self):
+        return "/events/{year}/simple"
 
-    def events_in_year_simple(self, **kw):
-        return self.q("/events/{year}/simple", kw)
+    @_query
+    def events_in_year_keys(self):
+        return "/events/{year}/keys"
 
-    def events_in_year_keys(self, **kw):
-        return self.q("/events/{year}/keys", kw)
+    @_query
+    def event(self):
+        return "/event/{event_key}"
 
-    def event(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_simple(self):
+        return "/event/{event_key}/simple"
 
-    def event_simple(self, **kw):
-        return self.q("/event/{event_key}/simple", kw)
+    @_query
+    def event_alliances(self):
+        return "/event/{event_key}/alliances"
 
-    def event_alliances(self, **kw):
-        return self.q("/event/{event_key}/alliances", kw)
+    @_query
+    def event_insights(self):
+        return "/event/{event_key}"
 
-    def event_insights(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_oprs(self):
+        return "/event/{event_key}"
 
-    def event_oprs(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_predictions(self):
+        return "/event/{event_key}"
 
-    def event_predictions(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_rankings(self):
+        return "/event/{event_key}/rankings"
 
-    def event_rankings(self, **kw):
-        return self.q("/event/{event_key}/rankings", kw)
+    @_query
+    def event_district_points(self):
+        return "/event/{event_key}/district_points"
 
-    def event_district_points(self, **kw):
-        return self.q("/event/{event_key}/district_points", kw)
+    @_query
+    def event_teams(self):
+        return "/event/{event_key}"
 
-    def event_teams(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_teams_simple(self):
+        return "/event/{event_key}"
 
-    def event_teams_simple(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_teams_keys(self):
+        return "/event/{event_key}"
 
-    def event_teams_keys(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_teams_statuses(self):
+        return "/event/{event_key}"
 
-    def event_teams_statuses(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_matches(self):
+        return "/event/{event_key}"
 
-    def event_matches(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_matches_simple(self):
+        return "/event/{event_key}"
 
-    def event_matches_simple(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_matches_keys(self):
+        return "/event/{event_key}"
 
-    def event_matches_keys(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_matches_timeseries(self):
+        return "/event/{event_key}"
 
-    def event_matches_timeseries(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def event_awards(self):
+        return "/event/{event_key}"
 
-    def event_awards(self, **kw):
-        return self.q("/event/{event_key}", kw)
+    @_query
+    def district_events(self):
+        return "/district/{district_key}/events"
 
-    def district_events(self, **kw):
-        return self.q("/district/{district_key}/events", kw)
+    @_query
+    def district_events_simple(self):
+        return "/district/{district_key}/events/simple"
 
-    def district_events_simple(self, **kw):
-        return self.q("/district/{district_key}/events/simple", kw)
-
-    def district_events_keys(self, **kw):
-        return self.q("/district/{district_key}/events/keys", kw)
+    @_query
+    def district_events_keys(self):
+        return "/district/{district_key}/events/keys"
