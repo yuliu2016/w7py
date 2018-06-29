@@ -1,12 +1,29 @@
 from .client import TBACachedSession
 
 
+class _APIQueryDecorationWrapper:
+
+    @classmethod
+    def query(cls, query_url_function):
+        def fetch_query(self: "TBABaseAPI", **kwargs):
+            url = self.session.query_args.create_url(query_url_function(self), **kwargs)
+            return getattr(self.session, url)
+
+        return fetch_query
+
+
 class TBABaseAPI:
+    query = _APIQueryDecorationWrapper.query
+
     def __init__(self, session: "TBACachedSession"):
         self.session = session
 
     def q(self, query, args):
         return getattr(self.session, self.session.query_args.create_url(query, **args))
+
+    @query
+    def test(self):
+        return "/status"
 
     def status(self):
         return self.q("/status", {})
