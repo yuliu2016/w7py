@@ -108,7 +108,7 @@ class TBAClient:
         return requests.get(self.TBA_BASE_URL + url, headers=self.get_request_headers()).json()
 
     TBA_BASE_URL = "https://www.thebluealliance.com/api/v3"
-    DIR_PREFIX_TBA_CACHE = "w7/.tba-cache/"
+    DIR_PREFIX_TBA_CACHE = "w7-data/tmp/tba-cache/"
 
 
 class TBACachedSession:
