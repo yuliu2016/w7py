@@ -93,12 +93,12 @@ class TBAClient:
     def __init__(self):
         self.auth_key = ''
         self.cache_directory = ''
-        self.set_cache(os.getcwd())
+        self.set_cache_location(os.getcwd())
 
     def set_key(self, key):
         self.auth_key = key
 
-    def set_cache(self, cache_directory: "str"):
+    def set_cache_location(self, cache_directory: "str"):
         self.cache_directory = os.path.join(cache_directory, self.DIR_PREFIX_TBA_CACHE)
 
     def get_request_headers(self):

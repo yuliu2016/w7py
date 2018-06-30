@@ -4,10 +4,10 @@ from .api import TBARawAPI
 from .client import TBACachedSession
 from .exceptions import *
 
-__all__ = ["event_adapter"]
+__all__ = ["event_helper"]
 
 
-class BaseAdapter:
+class TBABaseHelper:
     def __init__(self, session: "TBACachedSession"):
         self._api = TBARawAPI(session)
 
@@ -15,14 +15,14 @@ class BaseAdapter:
         return self._api
 
 
-class EventAdapter(BaseAdapter):
+class TBAEventHelper(TBABaseHelper):
     def __init__(self, session: "TBACachedSession"):
         super().__init__(session)
         if "event_key" not in session.query_args.tba_args:
-            raise TBARequiredArgumentNotSpecified("Cannot use EventAdapter without an event")
+            raise TBARequiredArgumentNotSpecified("Cannot use TBAEventHelper without an event")
         self.event_key = session.query_args.tba_args["event_key"]
 
-    def matches(self, simple: "bool" = False) -> "dict":
+    def list_matches(self, simple: "bool" = False) -> "dict":
         if simple:
             return self._api.event_matches_simple()
         else:
@@ -36,7 +36,7 @@ class EventAdapter(BaseAdapter):
 
         positions = [(colour, number) for colour in ["Red", "Blue"] for number in [0, 1, 2]]
         qualification_matches = {match["match_number"]: match
-                                 for match in self.matches(simple=True) if match["comp_level"] == "qm"}
+                                 for match in self.list_matches(simple=True) if match["comp_level"] == "qm"}
 
         schedule_rows = []
         for match_number in sorted(qualification_matches.keys()):
@@ -68,4 +68,4 @@ class EventAdapter(BaseAdapter):
                 return schedule_rows
 
 
-event_adapter = EventAdapter
+event_helper = TBAEventHelper
