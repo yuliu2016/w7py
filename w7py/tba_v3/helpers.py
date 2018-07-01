@@ -19,7 +19,7 @@ class TBAEventHelper(TBABaseHelper):
     def __init__(self, session: "TBACachedSession"):
         super().__init__(session)
         if "event_key" not in session.query_args.tba_args:
-            raise TBARequiredArgumentNotSpecified("Cannot use TBAEventHelper without an event")
+            raise TBARequiredArgumentNotError("Cannot use TBAEventHelper without an event")
         self.event_key = session.query_args.tba_args["event_key"]
 
     def list_matches(self, simple: "bool" = False) -> "dict":

@@ -70,14 +70,17 @@ class TBAClient:
         if pkl_exists:
             with open(pkl_path, "rb") as pickle_cache:
                 loaded_cache = pickle.load(pickle_cache)
-        session = TBACachedSession(self)
-        session.session_cache = loaded_cache
-        session.is_connectible = is_connectible
-        session.online_only = online_only
-        session.no_cache_value = no_cache_value
-        session.query_args = q_args
-        yield session
-        res_cache = session.session_cache
+        c_session = TBACachedSession(self)
+        c_session.session_cache = loaded_cache
+        c_session.is_connectible = is_connectible
+        c_session.online_only = online_only
+        c_session.no_cache_value = no_cache_value
+        c_session.query_args = q_args
+        yield c_session
+        if self.requests_session is not None:
+            self.requests_session.close()
+            self.requests_session = None
+        res_cache = c_session.session_cache
         if res_cache:
             with open(pkl_path, "wb") as pickle_file:
                 pickle.dump(res_cache, pickle_file)
@@ -94,6 +97,7 @@ class TBAClient:
         self.auth_key = ''
         self.cache_directory = ''
         self.set_cache_location(os.getcwd())
+        self.requests_session = None
 
     def set_key(self, key):
         self.auth_key = key
@@ -105,7 +109,10 @@ class TBAClient:
         return {'X-TBA-Auth-Key': self.auth_key}
 
     def raw_json(self, url: "str") -> "dict":
-        return requests.get(self.TBA_BASE_URL + url, headers=self.get_request_headers()).json()
+        if self.requests_session is None:
+            self.requests_session = requests.session()
+        return self.requests_session.get(self.TBA_BASE_URL + url,
+                                         headers=self.get_request_headers()).json()
 
     TBA_BASE_URL = "https://www.thebluealliance.com/api/v3"
     DIR_PREFIX_TBA_CACHE = "w7-data/tmp/tba-cache/"
@@ -125,13 +132,14 @@ class TBACachedSession:
         if self.online_only:
             return self.__parent_client.raw_json(item)
         if item in self.session_cache.keys():
-            return self.session_cache[item]
+            return self.session_cache[item]["body"]
         if not self.is_connectible:
             if self.no_cache_value == "raise":
-                raise TBANoCacheAvailableException("No cache for query '{}'".format(item))
+                raise TBANoCacheAvailableError("No cache for query '{}'".format(item))
             return {}
         res = self.__parent_client.raw_json(item)
-        self.session_cache[item] = res
+        data = {"body": res}
+        self.session_cache[item] = data
         return res
 
     def clear_cache(self):
@@ -149,7 +157,7 @@ class TBAQueryArguments:
         try:
             return query_template.format(**new_args)
         except KeyError as err:
-            raise TBARequiredArgumentNotSpecified("Required Argument " + str(err) + " was not specified")
+            raise TBARequiredArgumentNotError("Required Argument " + str(err) + " was not specified")
 
     def __str__(self):
         return "-".join(self.tba_args[key] for key in sorted(self.tba_args.keys()) if key in self.ARGS_KEYS)

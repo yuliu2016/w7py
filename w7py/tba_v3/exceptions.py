@@ -1,6 +1,6 @@
-class TBANoCacheAvailableException(Exception):
+class TBANoCacheAvailableError(Exception):
     pass
 
 
-class TBARequiredArgumentNotSpecified(KeyError):
+class TBARequiredArgumentNotError(KeyError):
     pass
