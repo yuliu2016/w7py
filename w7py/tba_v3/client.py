@@ -1,7 +1,7 @@
+import contextlib
 import json
 import os
 import pickle
-from contextlib import contextmanager
 from urllib import request as urllib_request
 
 import requests
@@ -11,7 +11,7 @@ from .exceptions import *
 
 class TBAClient:
 
-    @contextmanager
+    @contextlib.contextmanager
     def cached_session(self,
                        write_json: "bool" = True,
                        overwrite_id: "str" = "",
