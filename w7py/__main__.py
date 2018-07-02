@@ -1,2 +1,3 @@
-import cli
-cli.cli_main()
+from .cli import cli_main
+
+cli_main()

@@ -6,8 +6,8 @@ from urllib import request as urllib_request
 
 import requests
 
-from core import mdi
 from .exceptions import *
+from ..core import mdi
 
 
 class TBAClient:

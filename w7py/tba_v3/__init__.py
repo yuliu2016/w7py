@@ -4,6 +4,7 @@ from .helpers import *
 
 __all__ = ["TBANoCacheAvailableError",
            "TBARequiredArgumentNotError",
+           "TBAInvalidKeyError",
            "set_key",
            "set_cache_location",
            "session",

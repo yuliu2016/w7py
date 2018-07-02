@@ -22,6 +22,11 @@ class TBAEventHelper(TBABaseHelper):
             raise TBARequiredArgumentNotError("Cannot use TBAEventHelper without an event")
         self.event_key = session.query_args.tba_args["event_key"]
 
+    def check_validity(self):
+        res = self._api.event()
+        if "Error" in res.keys():
+            raise TBAInvalidKeyError("Invalid Event Key")
+
     def list_matches(self, simple: "bool" = False) -> "dict":
         if simple:
             return self._api.event_matches_simple()

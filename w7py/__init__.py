@@ -1,5 +1,5 @@
-from core.ix import *
 from . import tba_v3
+from .core.ix import *
 
 tba = tba_v3
 

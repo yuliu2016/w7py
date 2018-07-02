@@ -4,3 +4,7 @@ class TBANoCacheAvailableError(Exception):
 
 class TBARequiredArgumentNotError(KeyError):
     pass
+
+
+class TBAInvalidKeyError(KeyError):
+    pass

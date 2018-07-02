@@ -14,15 +14,7 @@ if Path:
     mdi_home = str(Path.home())
 else:
     mdi_home = os.path.expanduser("~")
-if len(sys.argv) > 1:
-    _root = sys.argv[1]
-    if _root == ".":
-        mdi_root = os.getcwd()
-    elif os.path.isdir(_root):
-        mdi_root = _root
-    else:
-        raise FileNotFoundError
-elif sys.platform.startswith("win"):
+if sys.platform.startswith("win"):
     mdi_root = _join(mdi_home, "AppData/Local/")
 elif sys.platform.startswith("darwin"):
     mdi_root = _join(mdi_home, "Library/Application Support/")
