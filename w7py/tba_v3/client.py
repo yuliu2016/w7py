@@ -6,6 +6,7 @@ from urllib import request as urllib_request
 
 import requests
 
+from core import mdi
 from .exceptions import *
 
 
@@ -45,7 +46,7 @@ class TBAClient:
                 if len(res.keys()) == 1:
                     is_connectible = False
                     if online_only:
-                        raise requests.RequestException("The TBA Key is incorrect!!")
+                        raise requests.RequestException("The TBA Key is set incorrectly!")
         else:
             is_connectible = False
             if online_only:
@@ -94,7 +95,11 @@ class TBAClient:
                 os.remove(pkl_path)
 
     def __init__(self):
-        self.auth_key = ''
+        key = mdi.str_reg("tba_key")
+        if key:
+            self.auth_key = key
+        else:
+            self.auth_key = ''
         self.cache_directory = ''
         self.set_cache_location(os.getcwd())
         self.requests_session = None

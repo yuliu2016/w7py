@@ -6,10 +6,10 @@ if __name__ == "__main__":
 
     setuptools.setup(
         name="w7py",
-        version="0.0.1a",
+        version="0.0.1",
         description="w7py",
         long_description=long_description,
-        long_description_content_type="text/markdown",
+        # long_description_content_type="text/markdown",
         url="https://github.com/yuliu2016/w7py",
         packages=setuptools.find_packages(),
         classifiers=(
