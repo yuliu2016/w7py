@@ -115,6 +115,9 @@ class TBAClient:
         self.set_cache_location(os.getcwd())
         self.requests_session = None
 
+    def __repr__(self):
+        return "<TBAClient key={}, cache={}>".format(self.auth_key, self.cache_directory)
+
     def set_key(self, key):
         self.auth_key = key
 
@@ -184,6 +187,10 @@ class TBAQueryArguments:
     def __str__(self):
         return "-".join(self.query_args_dict[key] for key in
                         sorted(self.query_args_dict.keys()) if key in self.ARGS_KEYS)
+
+    def __repr__(self):
+        return "<TBAQueryArguments {}>".format(
+            ",".join("{}={}".format(k, v) for k, v in self.query_args_dict.items()))
 
     def __bool__(self):
         return bool(list(key for key in self.query_args_dict.keys() if key in self.ARGS_KEYS))
