@@ -1,7 +1,9 @@
+from typing import *
+
 import pandas as pd
 
 from .api import TBARawAPI
-from .client import TBACachedSession
+from .client import TBACachedSession, TBAQueryArguments
 from .exceptions import *
 
 __all__ = ["event_helper"]
@@ -18,9 +20,9 @@ class TBABaseHelper:
 class TBAEventHelper(TBABaseHelper):
     def __init__(self, session: "TBACachedSession"):
         super().__init__(session)
-        if "event_key" not in session.query_args.tba_args:
+        if "event_key" not in session.query_args.query_args_dict:
             raise TBARequiredArgumentNotError("Cannot use TBAEventHelper without an event")
-        self.event_key = session.query_args.tba_args["event_key"]
+        self.event_key = session.query_args.query_args_dict["event_key"]
 
     def check_validity(self):
         res = self._api.event()
@@ -72,6 +74,21 @@ class TBAEventHelper(TBABaseHelper):
                 return {column: [row[column] for row in schedule_rows] for column in columns}
             else:
                 return schedule_rows
+
+
+def _args_helper(*args,
+                 team_key: "Union[str, int]" = "",
+                 team=None,
+                 district_key: "str" = "",
+                 district=None,
+                 match_key: "str" = "",
+                 match=None,
+                 event_key: "str" = "",
+                 event=None,
+                 year: "Union[str, int]" = "",
+                 media_tag: "str" = "",
+                 page_num: "Union[str, int]" = "") -> "TBAQueryArguments":
+    pass
 
 
 event_helper = TBAEventHelper

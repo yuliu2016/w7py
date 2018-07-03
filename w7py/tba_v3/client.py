@@ -22,7 +22,8 @@ class TBAClient:
                        existing_args=None,
                        **preset_tba_args: "str"):
         """
-        Creates a cached session to access the TBA API
+        Creates a cached session to access the TBA API.
+
         :param write_json: whether the json file should be made (may slow down slightly)
         :param overwrite_id: specifies the session id to overwrite (especially for testing)
         :param online_only: specifies raising an error if not connected
@@ -164,21 +165,31 @@ class TBACachedSession:
 class TBAQueryArguments:
     ARGS_KEYS = ["team_key", "district_key", "match_key", "event_key", "year", "media_tag", "page_num"]
 
-    def __init__(self, **tba_args):
-        self.tba_args = tba_args
+    def __init__(self, **query_args):
+        self.query_args_dict = query_args
 
     def create_url(self, query_template: str, **union_args):
-        new_args = {**self.tba_args, **union_args}
+        new_args = self.updated(union_args)
         try:
             return query_template.format(**new_args)
         except KeyError as err:
             raise TBARequiredArgumentNotError("Required Argument " + str(err) + " was not specified")
 
     def __str__(self):
-        return "-".join(self.tba_args[key] for key in sorted(self.tba_args.keys()) if key in self.ARGS_KEYS)
+        return "-".join(self.query_args_dict[key] for key in
+                        sorted(self.query_args_dict.keys()) if key in self.ARGS_KEYS)
 
     def __bool__(self):
-        return bool(list(key for key in self.tba_args.keys() if key in self.ARGS_KEYS))
+        return bool(list(key for key in self.query_args_dict.keys() if key in self.ARGS_KEYS))
+
+    def updated(self, other):
+        if type(other) is dict:
+            other_args = other
+        elif type(other) is TBAQueryArguments:
+            other_args = other.query_args_dict
+        else:
+            return None
+        return {**self.query_args_dict, **other_args}
 
 
 client_instance = TBAClient()
