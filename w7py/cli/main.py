@@ -1,5 +1,7 @@
 import sys
 
+import pandas as pd
+
 from .clip import clip
 from .. import tba_v3 as tba
 from ..core import mdi
@@ -22,3 +24,9 @@ def qms(args):
     with tba.session(overwrite_id="qms", event_key=args.event_key) as s:
         event = tba.event_helper(s)
         event.check_validity()
+        if args.li:
+            print(event.qualification_match_schedule(use_df=False, transpose=args.transpose))
+        else:
+            df = event.qualification_match_schedule(transpose=args.transpose)
+            with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+                print(df)

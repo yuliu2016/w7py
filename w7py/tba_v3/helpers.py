@@ -24,7 +24,7 @@ class TBAEventHelper(TBABaseHelper):
 
     def check_validity(self):
         res = self._api.event()
-        if "Error" in res.keys():
+        if "Errors" in res.keys():
             raise TBAInvalidKeyError("Invalid Event Key")
 
     def list_matches(self, simple: "bool" = False) -> "dict":
@@ -60,6 +60,7 @@ class TBAEventHelper(TBABaseHelper):
 
         if use_df:
             table = pd.DataFrame(schedule_rows, columns=columns)
+            table.index.name = "Match #"
             if df_one_indexed:
                 table.index += 1
             if transpose:
