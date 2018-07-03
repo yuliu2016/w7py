@@ -6,7 +6,7 @@ from .api import TBARawAPI
 from .client import TBACachedSession, TBAQueryArguments
 from .exceptions import *
 
-__all__ = ["event_helper"]
+__all__ = ["query_args", "event_helper"]
 
 
 class TBABaseHelper:
@@ -15,6 +15,9 @@ class TBABaseHelper:
 
     def _get_api(self) -> "TBARawAPI":
         return self._api
+
+    def _has_error(self, req, **kw):
+        return "Errors" in getattr(self._api, req)(**kw).keys()
 
 
 class TBAEventHelper(TBABaseHelper):
@@ -25,8 +28,7 @@ class TBAEventHelper(TBABaseHelper):
         self.event_key = session.query_args.query_args_dict["event_key"]
 
     def check_validity(self):
-        res = self._api.event()
-        if "Errors" in res.keys():
+        if self._has_error("event"):
             raise TBAInvalidKeyError("Invalid Event Key")
 
     def list_matches(self, simple: "bool" = False) -> "dict":
@@ -76,19 +78,46 @@ class TBAEventHelper(TBABaseHelper):
                 return schedule_rows
 
 
-def _args_helper(*args,
-                 team_key: "Union[str, int]" = "",
-                 team=None,
-                 district_key: "str" = "",
-                 district=None,
-                 match_key: "str" = "",
-                 match=None,
-                 event_key: "str" = "",
-                 event=None,
-                 year: "Union[str, int]" = "",
-                 media_tag: "str" = "",
-                 page_num: "Union[str, int]" = "") -> "TBAQueryArguments":
-    pass
+def query_args(*args,
+               team_key: "Union[str, int]" = "",
+               team: "Any" = None,
+               district_key: "str" = "",
+               district: "Any" = None,
+               match_key: "str" = "",
+               match: "Any" = None,
+               event_key: "str" = "",
+               event: "Any" = None,
+               year: "Union[str, int]" = "",
+               media_tag: "str" = "",
+               page_num: "Union[str, int]" = "") -> "TBAQueryArguments":
+    _args = {}
+    if team_key:
+        _args["team_key"] = team_key
+    elif team:
+        _args["team_key"] = team
+    if district_key:
+        _args["district_key"] = district_key
+    elif district:
+        _args["district_key"] = district
+    if match_key:
+        _args["match_key"] = match_key
+    elif match:
+        _args["match_key"] = match
+    if event_key:
+        _args["event_key"] = event_key
+    elif event:
+        _args["event_key"] = event
+    if year:
+        _args["year"] = year
+    if media_tag:
+        _args["media_tag"] = media_tag
+    if page_num:
+        _args["page_num"] = page_num
+    if args:
+        for arg in args:
+            if type(arg) is TBAQueryArguments:
+                _args = arg.updated(_args)
+    return TBAQueryArguments(**_args)
 
 
 event_helper = TBAEventHelper

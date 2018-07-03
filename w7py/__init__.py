@@ -1,9 +1,4 @@
-from . import tba_v3
-from .core.ix import *
+from . import tba_v3 as tba
+from .core import ix
 
-tba = tba_v3
-
-__all__ = ["match_",
-           "team_",
-           "event_",
-           "tba"]
+__all__ = ["ix", "tba"]

@@ -163,7 +163,13 @@ class TBACachedSession:
 
 
 class TBAQueryArguments:
-    ARGS_KEYS = ["team_key", "district_key", "match_key", "event_key", "year", "media_tag", "page_num"]
+    ARGS_KEYS = ["team_key",
+                 "district_key",
+                 "match_key",
+                 "event_key",
+                 "year",
+                 "media_tag",
+                 "page_num"]
 
     def __init__(self, **query_args):
         self.query_args_dict = query_args
@@ -181,6 +187,11 @@ class TBAQueryArguments:
 
     def __bool__(self):
         return bool(list(key for key in self.query_args_dict.keys() if key in self.ARGS_KEYS))
+
+    def __getattr__(self, item):
+        if item in self.query_args_dict.keys():
+            return self.query_args_dict[item]
+        return None
 
     def updated(self, other):
         if type(other) is dict:
