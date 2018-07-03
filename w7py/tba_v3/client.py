@@ -14,6 +14,7 @@ class TBAClient:
 
     @contextlib.contextmanager
     def cached_session(self,
+                       *args,
                        write_json: "bool" = True,
                        overwrite_id: "str" = "",
                        online_only: "bool" = False,
@@ -31,8 +32,9 @@ class TBAClient:
                and includes "team_key", "district_key", "match_key", "event_key", "year", "media_tag", "page_num"
         :return: A context managed object to be used for TBA requests
         """
-        connection_test_ip: "str" = 'http://216.58.192.142'
-        connection_test_tba_query: "str" = "/team/frc865"
+
+        connection_test_ip = 'http://216.58.192.142'
+        connection_test_tba_query = "/team/frc865"
         is_connectible = True
         if self.auth_key:
             try:
@@ -54,7 +56,15 @@ class TBAClient:
         if type(existing_args) is TBAQueryArguments:
             q_args = existing_args
         else:
-            q_args = TBAQueryArguments(**preset_tba_args)
+            pos_q_args = None
+            for arg in args:
+                if type(arg) is TBAQueryArguments:
+                    pos_q_args = arg
+                    break
+            if pos_q_args is not None:
+                q_args = pos_q_args
+            else:
+                q_args = TBAQueryArguments(**preset_tba_args)
         if overwrite_id:
             session_id = overwrite_id
         elif q_args:
@@ -88,7 +98,7 @@ class TBAClient:
             if write_json:
                 with open(json_path, "w") as json_file:
                     json.dump(res_cache, json_file, indent=2)
-        else:  # File need to be removed here due to clear_cache
+        else:
             if json_exists:
                 os.remove(json_path)
             if pkl_exists:
