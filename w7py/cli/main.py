@@ -8,6 +8,12 @@ from ..core import mdi
 from ..tba_v3.client import client_instance
 
 
+def confirm(s):
+    print(s)
+    yn = input("Proceed?[y/N] ")
+    return yn == "y" or yn == "Y"
+
+
 def cli_main():
     if len(sys.argv) == 1:
         clip.print_help()
