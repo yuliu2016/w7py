@@ -1,6 +1,6 @@
-import setuptools
-
 if __name__ == "__main__":
+    import setuptools
+
     with open("README.md", "r") as fh:
         long_description = fh.read()
 
@@ -9,7 +9,6 @@ if __name__ == "__main__":
         version="0.0.1",
         description="w7py",
         long_description=long_description,
-        # long_description_content_type="text/markdown",
         url="https://github.com/yuliu2016/w7py",
         packages=setuptools.find_packages(),
         classifiers=(
