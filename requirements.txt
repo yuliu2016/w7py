@@ -1,10 +1,1 @@
-requests
-numpy
-scipy
-matplotlib
-pandas
-openpyxl
-sqlalchemy
 wheel
-pywin32
-xlwings
