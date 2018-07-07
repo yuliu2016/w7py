@@ -112,7 +112,7 @@ class TBAClient:
         else:
             self.auth_key = ''
         self.cache_directory = ''
-        self.set_cache_location(os.getcwd())
+        self.set_cache_location(ft.md_ucf)
         self.requests_session = None
 
     def __repr__(self):
@@ -134,7 +134,7 @@ class TBAClient:
                                          headers=self.get_request_headers()).json()
 
     TBA_BASE_URL = "https://www.thebluealliance.com/api/v3"
-    DIR_PREFIX_TBA_CACHE = "w7-data/tmp/tba-cache/"
+    DIR_PREFIX_TBA_CACHE = "tmp/tba-cache/"
 
 
 class TBACachedSession:

@@ -26,9 +26,9 @@ md_id = hashlib.md5(md_home.encode()).hexdigest()
 md_ucf = _join(md_root, md_id)
 if not os.path.isdir(md_ucf):
     os.makedirs(md_ucf)
-_root_file = "{}.dat".format(md_id)
+_root_file = md_id
 _root_fp = _join(md_ucf, _root_file)
-_path_file = "{}.dat".format(hashlib.md5(os.getcwd().encode()).hexdigest())
+_path_file = hashlib.md5(os.getcwd().encode()).hexdigest()
 _path_fp = _join(md_ucf, _path_file)
 md_files = [_root_file, _path_file]
 md_fp = [_root_fp, _path_fp]
