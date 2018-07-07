@@ -80,9 +80,8 @@ class _MatchIndexer(_LookupIndexer):
 
     def __init__(self, other, level=COMP_LEVEL_SHORT[0]):
         if type(other) is _MatchIndexer:
-            mi: "_MatchIndexer" = other
-            self._match_number = mi.match_number()
-            self._comp_level = mi.comp_level()
+            self._match_number = other.match_number()
+            self._comp_level = other.comp_level()
         elif type(other) is str:
             self.parse_tba_string(other)
         else:
@@ -144,9 +143,8 @@ class _MatchIndexer(_LookupIndexer):
 class _EventIndexer(_LookupIndexer):
     def __init__(self, other, name=None):
         if type(other) is _EventIndexer:
-            ei: "_EventIndexer" = other
-            self._name = ei.name()
-            self._event_code = ei.event_code()
+            self._name = other.name()
+            self._event_code = other.event_code()
         elif type(other) is str:
             self.parse_tba_string(other)
             if name is not None:

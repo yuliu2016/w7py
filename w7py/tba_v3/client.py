@@ -7,7 +7,7 @@ from urllib import request as urllib_request
 import requests
 
 from .exceptions import *
-from ..core import mdi
+from ..core import ft
 
 
 class TBAClient:
@@ -106,7 +106,7 @@ class TBAClient:
                 os.remove(pkl_path)
 
     def __init__(self):
-        key = mdi.sys_reg_prompt("tba_key")
+        key = ft.sys_reg_prompt("tba_key")
         if key:
             self.auth_key = key
         else:
@@ -145,7 +145,7 @@ class TBACachedSession:
         self.session_cache = {}
         self.session_name = ""
         self.no_cache_value = "empty_dict"
-        self.query_args: "TBAQueryArguments" = None
+        self.query_args = None
 
     def __getattr__(self, item) -> "dict":
         if self.online_only:

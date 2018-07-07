@@ -5,7 +5,7 @@ import pandas as pd
 
 from .clip import clip
 from .. import tba_v3 as tba
-from ..core import mdi
+from ..core import ft
 from ..tba_v3.client import client_instance
 
 
@@ -17,7 +17,7 @@ def confirm(s):
 
 def qms(args):
     if not client_instance.auth_key:
-        key = mdi.sys_reg_prompt("tba_key", "Enter your TBA key to continue (it will be cached): ")
+        key = ft.sys_reg_prompt("tba_key", "Enter your TBA key to continue (it will be cached): ")
         client_instance.set_key(key)
     with tba.session(overwrite_id="qms", event_key=args.event_key) as s:
         event = tba.event_helper(s)
