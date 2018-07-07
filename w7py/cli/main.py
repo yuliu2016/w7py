@@ -1,3 +1,4 @@
+import io
 import sys
 
 import pandas as pd
@@ -25,8 +26,13 @@ def qms(args):
             print(event.qualification_match_schedule(use_df=False, transpose=args.transpose))
         else:
             df = event.qualification_match_schedule(transpose=args.transpose)
-            with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-                print(df)
+            if args.csv:
+                with io.StringIO() as buf:
+                    df.to_csv(buf)
+                    print(buf.getvalue())
+            else:
+                with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+                    print(df)
 
 
 def cli_main():
