@@ -14,18 +14,9 @@ def confirm(s):
     return yn == "y" or yn == "Y"
 
 
-def cli_main():
-    if len(sys.argv) == 1:
-        clip.print_help()
-        return
-    args = clip.parse_args()
-    if args.command == "qms":
-        qms(args)
-
-
 def qms(args):
     if not client_instance.auth_key:
-        key = mdi.str_reg("tba_key", "Enter your TBA key to continue (it will be cached): ")
+        key = mdi.sys_reg_prompt("tba_key", "Enter your TBA key to continue (it will be cached): ")
         client_instance.set_key(key)
     with tba.session(overwrite_id="qms", event_key=args.event_key) as s:
         event = tba.event_helper(s)
@@ -36,3 +27,12 @@ def qms(args):
             df = event.qualification_match_schedule(transpose=args.transpose)
             with pd.option_context('display.max_rows', None, 'display.max_columns', None):
                 print(df)
+
+
+def cli_main():
+    if len(sys.argv) == 1:
+        clip.print_help()
+        return
+    args = clip.parse_args()
+    if args.command == "qms":
+        qms(args)

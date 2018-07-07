@@ -26,7 +26,7 @@ mdi_id = hashlib.md5(mdi_home.encode()).hexdigest()
 mdi_ucf = _join(mdi_root, mdi_id)
 if not os.path.isdir(mdi_ucf):
     os.makedirs(mdi_ucf)
-_root_file = "root.dat"
+_root_file = "{}.dat".format(mdi_id)
 _root_fp = _join(mdi_ucf, _root_file)
 _path_file = "{}.dat".format(hashlib.md5(os.getcwd().encode()).hexdigest())
 _path_fp = _join(mdi_ucf, _path_file)
@@ -45,8 +45,8 @@ else:
 _mdi_should_remove_all = False
 
 
-def str_reg(key: "str",
-            prompt: "typing.Optional[str]" = None) -> "typing.Optional[str]":
+def sys_reg_prompt(key: "str",
+                   prompt: "typing.Optional[str]" = None) -> "typing.Optional[str]":
     if key in mdi_reg.keys():
         return str(mdi_reg[key])
     if prompt is None:

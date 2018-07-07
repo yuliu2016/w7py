@@ -106,7 +106,7 @@ class TBAClient:
                 os.remove(pkl_path)
 
     def __init__(self):
-        key = mdi.str_reg("tba_key")
+        key = mdi.sys_reg_prompt("tba_key")
         if key:
             self.auth_key = key
         else:
