@@ -17,6 +17,7 @@ class TBAClient:
                        *args,
                        write_json: "bool" = True,
                        overwrite_id: "str" = "",
+                       check_connection: "bool" = True,
                        online_only: "bool" = False,
                        no_cache_value: "str" = "empty_dict",
                        existing_args=None,
@@ -26,6 +27,7 @@ class TBAClient:
 
         :param write_json: whether the json file should be made (may slow down slightly)
         :param overwrite_id: specifies the session id to overwrite (especially for testing)
+        :param check_connection: whether to check for internet connection
         :param online_only: specifies raising an error if not connected
         :param no_cache_value: specifies the value to return if no cache is found, or "raise" to raise exception
         :param existing_args: if not None, specifies a previous argument set
@@ -37,23 +39,24 @@ class TBAClient:
         connection_test_ip = 'http://216.58.192.142'
         connection_test_tba_query = "/team/frc865"
         is_connectible = True
-        if self.auth_key:
-            try:
-                urllib_request.urlopen(connection_test_ip, timeout=1)  # Test for internet connection
-            except urllib_request.URLError:
-                is_connectible = False
-                if online_only:
-                    raise requests.ConnectionError("Cannot Connect to the Internet")
-            if is_connectible:
-                res = self.raw_json(connection_test_tba_query)  # Test for the Blue Alliance connection
-                if len(res.keys()) == 1:
+        if check_connection:
+            if self.auth_key:
+                try:
+                    urllib_request.urlopen(connection_test_ip, timeout=1)  # Test for internet connection
+                except urllib_request.URLError:
                     is_connectible = False
                     if online_only:
-                        raise requests.RequestException("The TBA Key is set incorrectly!")
-        else:
-            is_connectible = False
-            if online_only:
-                raise ValueError("No TBA key set. Get one from the website!")
+                        raise requests.ConnectionError("Cannot Connect to the Internet")
+                if is_connectible:
+                    res = self.raw_json(connection_test_tba_query)  # Test for the Blue Alliance connection
+                    if len(res.keys()) == 1:
+                        is_connectible = False
+                        if online_only:
+                            raise requests.RequestException("The TBA Key is set incorrectly!")
+            else:
+                is_connectible = False
+                if online_only:
+                    raise ValueError("No TBA key set. Get one from the website!")
         if type(existing_args) is TBAQueryArguments:
             q_args = existing_args
         else:
