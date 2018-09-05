@@ -98,7 +98,8 @@ class ScoutingRotation:
     def min_weight_order(self):
         return sorted(self.teams_set, key=lambda x: self.entries_count[x])
 
-    def set_checked_weight(self, match, team, i):
+    def set_checked_weight(self, match, team):
+        i = self.schedule[match].index(team)
         if self.weighted_schedule[match][i] > 0:
             self.weighted_schedule[match][i] += 1
         else:
@@ -111,11 +112,11 @@ class ScoutingRotation:
                 self.weighted_schedule[match][i] += 1
                 self.entries_count[team] += 1
 
-    def weight_match(self, idx, looping_team):
+    def weight_match(self, idx, lt):
         match = self.sorted_matches[idx]
-        for i, team in enumerate(self.schedule[match]):
-            if team == looping_team:
-                self.set_checked_weight(match, team, i)
+        for team in self.schedule[match]:
+            if team == lt:
+                self.set_checked_weight(match, team)
                 return True
         return False
 
@@ -129,12 +130,13 @@ class ScoutingRotation:
                 counted_limit -= 1
             idx -= 1
             if idx == 0:
-                idx = idx_max
+                idx = idx_max - 1
+                counted_limit -= 1
 
-    def weight_loop_down(self, looping_team: int, ids_min: int):
+    def weight_loop_down(self, looping_team: int, idx_min: int):
         if not self.entries_count[looping_team] < self.entries_limit:
             return
-        idx = ids_min
+        idx = idx_min
         counted_limit = self.entries_limit
         total_matches = len(self.sorted_matches)
         while counted_limit > 0 and idx < total_matches:
@@ -142,7 +144,8 @@ class ScoutingRotation:
                 counted_limit -= 1
             idx += 1
             if idx == total_matches:
-                idx = ids_min
+                idx = idx_min - 1
+                counted_limit -= 1
 
     def weight_by_match_appearance(self, appeared_team: int):
         for match in self.sorted_matches:
@@ -180,6 +183,14 @@ class ScoutingRotation:
                 for i, testing_team in enumerate(self.schedule[match]):
                     if self.weighted_schedule[match][i] > normal_max:
                         normal_max = self.weighted_schedule[match][i]
+            else:
+                match_normal_max = 0
+                for i, testing_team in enumerate(self.schedule[match]):
+                    if testing_team not in self.priority_teams and \
+                            self.weighted_schedule[match][i] > match_normal_max:
+                        match_normal_max = self.weighted_schedule[match][i]
+                for i, weight in enumerate(self.weighted_schedule[match]):
+                    self.weighted_schedule[match][i] = min(weight, match_normal_max)
         for match in self.sorted_matches:
             for i, weight in enumerate(self.weighted_schedule[match]):
                 self.weighted_schedule[match][i] = min(weight, normal_max)
@@ -239,7 +250,6 @@ if __name__ == '__main__':
     import sys
 
     sys.path.append("C:/Users/Yu/PycharmProjects/w7py/tests")
-
     qms = __import__("iri_qms").iri_qms
     r = ScoutingRotation(qms)
     r.set_available(6, 1)
@@ -249,5 +259,4 @@ if __name__ == '__main__':
     r.debug_entries_count()
     r.debug_weighted_percentage()
     r.calculate_virtual_schedule()
-    r.debug_virtual_schedule()
     r.debug_virtual_scout_count()
