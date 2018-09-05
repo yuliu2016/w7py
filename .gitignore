@@ -6,3 +6,4 @@ build/
 dist/
 w7py.egg-info/
 w7-data/
+*.pyc
