@@ -5,7 +5,7 @@ class ScoutingRotation:
         self.sorted_matches = []
         self.teams_set = set()
         self.priority_teams = []
-        self.scouts = set()
+        self.scouts_set = set()
         self.scout_schedule = {}
         self.scout_schedule_by_match = {}
         self.virtual_schedule = {}
@@ -14,6 +14,7 @@ class ScoutingRotation:
         self.entries_count = {}
 
         self.expected_entries = 0
+        self.scouted_match_limit = 0
         self.entries_limit = 0
         self.scouts_limit = 0
         self.available_ratio = 1.0
@@ -31,10 +32,11 @@ class ScoutingRotation:
         self.available_ratio = ratio
         self.expected_entries = int(total_matches * scout_limit * ratio)
         self.entries_limit = int(self.expected_entries / len(self.teams_set))
+        self.scouted_match_limit = min(self.entries_limit, int(total_matches * 6 / len(self.teams_set)))
         self.scouts_limit = scout_limit
 
-    def set_entries_limit(self, limit: int):
-        self.entries_limit = max(limit, 0)
+    def set_scouted_match_limit(self, limit: int):
+        self.scouted_match_limit = max(limit, 0)
         self.scouts_limit = 6
 
     def set_priority_teams(self, teams: list):
@@ -44,7 +46,7 @@ class ScoutingRotation:
                 self.priority_teams.append(team)
 
     def set_scouts(self, scouts):
-        self.scouts = set(scouts)
+        self.scouts_set = set(scouts)
 
     def reset_weights(self):
         self.weighted_schedule = {m: [0] * 6 for m in self.sorted_matches}
@@ -82,7 +84,7 @@ class ScoutingRotation:
     def debug_weights(self):
         self.debug_pp(self.weighted_schedule)
 
-    def debug_entries_count(self):
+    def debug_matches_scouted_count(self):
         self.debug_pp(self.entries_count)
 
     def debug_virtual_schedule(self):
@@ -104,11 +106,10 @@ class ScoutingRotation:
             self.weighted_schedule[match][i] += 1
         else:
             available_scouts = self.scouts_limit
-            for current_weight in self.weighted_schedule[match]:
-                if current_weight > 0:
+            for weight in self.weighted_schedule[match]:
+                if weight > 0:
                     available_scouts -= 1
-            team_in_limit = self.entries_count[team] < self.entries_limit
-            if available_scouts > 0 and team_in_limit:
+            if available_scouts > 0 and self.entries_count[team] < self.scouted_match_limit:
                 self.weighted_schedule[match][i] += 1
                 self.entries_count[team] += 1
 
@@ -121,10 +122,10 @@ class ScoutingRotation:
         return False
 
     def weight_loop_up(self, looping_team: int, idx_max: int):
-        if not self.entries_count[looping_team] < self.entries_limit:
+        if not self.entries_count[looping_team] < self.scouted_match_limit:
             return
         idx = idx_max
-        counted_limit = self.entries_limit
+        counted_limit = self.scouted_match_limit
         while counted_limit > 0 and idx >= 0:
             if self.weight_match(idx, looping_team):
                 counted_limit -= 1
@@ -134,10 +135,10 @@ class ScoutingRotation:
                 counted_limit -= 1
 
     def weight_loop_down(self, looping_team: int, idx_min: int):
-        if not self.entries_count[looping_team] < self.entries_limit:
+        if not self.entries_count[looping_team] < self.scouted_match_limit:
             return
         idx = idx_min
-        counted_limit = self.entries_limit
+        counted_limit = self.scouted_match_limit
         total_matches = len(self.sorted_matches)
         while counted_limit > 0 and idx < total_matches:
             if self.weight_match(idx, looping_team):
@@ -208,32 +209,6 @@ class ScoutingRotation:
         pos_indices = list(range(6))
         scout_idx = list(range(self.scouts_limit))
 
-        # expected_per_scout = int(len(self.sorted_matches) * self.available_ratio)
-        # weight_level = 0
-        # while True:
-        #     for match in self.sorted_matches:
-        #         match_weights = self.weighted_schedule[match]
-        #
-        #         match_available = list(
-        #             filter(lambda x: match not in next(zip(*self.virtual_schedule[x])), scout_idx))
-        #         match_available = sorted(match_available, key=lambda x: len(self.virtual_schedule[x]))
-        #         pos_indices = sorted(pos_indices, key=lambda x: match_weights[x], reverse=True)
-        #         for pos_index in pos_indices:
-        #             if match_weights[pos_index] > weight_level and len(match_available) > 0:
-        #                 scout = match_available.pop(0)
-        #                 if len(self.virtual_schedule[scout]) >= expected_per_scout:
-        #                     return
-        #                 # if scout in self.virtual_schedule_by_match[match][pos_index]:
-        #                 #     return
-        #                 self.virtual_schedule_by_match[match][pos_index].append(scout)
-        #                 self.virtual_schedule[scout].append(
-        #                     (match, self.schedule[match][pos_index], pos_index))
-        #             else:
-        #                 return
-        #     # weight_level += 1
-        #     # if weight_level >= 2:
-        #     #     weight_level = 0
-
         for match in self.sorted_matches:
             match_weights = self.weighted_schedule[match]
             match_available = sorted(scout_idx, key=lambda x: len(self.virtual_schedule[x]))
@@ -256,7 +231,7 @@ if __name__ == '__main__':
     r.set_priority_teams([865])
     r.calculate_weights()
     r.debug_weights()
-    r.debug_entries_count()
+    r.debug_matches_scouted_count()
     r.debug_weighted_percentage()
     r.calculate_virtual_schedule()
     r.debug_virtual_scout_count()
