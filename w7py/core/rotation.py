@@ -8,10 +8,11 @@ class ScoutingRotation:
         self.scouts_set = set()
         self.scout_schedule = {}
         self.scout_schedule_by_match = {}
+        self.distribution_schedule = {}
         self.virtual_schedule = {}
         self.virtual_schedule_by_match = {}
         self.weighted_schedule = {}
-        self.entries_count = {}
+        self.scouted_matches_count = {}
 
         self.expected_entries = 0
         self.scouted_match_limit = 0
@@ -50,13 +51,16 @@ class ScoutingRotation:
 
     def reset_weights(self):
         self.weighted_schedule = {m: [0] * 6 for m in self.sorted_matches}
-        self.entries_count = {t: 0 for t in self.teams_set}
+        self.scouted_matches_count = {t: 0 for t in self.teams_set}
 
     def reset_virtual_schedule(self):
         scout_indices = list(range(self.scouts_limit))
         self.virtual_schedule_by_match = {m: [[] for _ in range(6)] for
                                           m in self.sorted_matches}
         self.virtual_schedule = {scout: [] for scout in scout_indices}
+
+    def reset_distribution_schedule(self):
+        self.distribution_schedule = {m: [0] * 6 for m in self.sorted_matches}
 
     def assert_weights(self):
         if not self.weighted_schedule:
@@ -85,7 +89,10 @@ class ScoutingRotation:
         self.debug_pp(self.weighted_schedule)
 
     def debug_matches_scouted_count(self):
-        self.debug_pp(self.entries_count)
+        self.debug_pp(self.scouted_matches_count)
+
+    def debug_distribution_schedule(self):
+        self.debug_pp(self.distribution_schedule)
 
     def debug_virtual_schedule(self):
         self.debug_pp(self.virtual_schedule)
@@ -98,7 +105,7 @@ class ScoutingRotation:
                        list(map(len, self.virtual_schedule.values())))))
 
     def min_weight_order(self):
-        return sorted(self.teams_set, key=lambda x: self.entries_count[x])
+        return sorted(self.teams_set, key=lambda x: self.scouted_matches_count[x])
 
     def set_checked_weight(self, match, team):
         i = self.schedule[match].index(team)
@@ -109,9 +116,9 @@ class ScoutingRotation:
             for weight in self.weighted_schedule[match]:
                 if weight > 0:
                     available_scouts -= 1
-            if available_scouts > 0 and self.entries_count[team] < self.scouted_match_limit:
+            if available_scouts > 0 and self.scouted_matches_count[team] < self.scouted_match_limit:
                 self.weighted_schedule[match][i] += 1
-                self.entries_count[team] += 1
+                self.scouted_matches_count[team] += 1
 
     def weight_match(self, idx, lt):
         match = self.sorted_matches[idx]
@@ -122,7 +129,7 @@ class ScoutingRotation:
         return False
 
     def weight_loop_up(self, looping_team: int, idx_max: int):
-        if not self.entries_count[looping_team] < self.scouted_match_limit:
+        if not self.scouted_matches_count[looping_team] < self.scouted_match_limit:
             return
         idx = idx_max
         counted_limit = self.scouted_match_limit
@@ -135,7 +142,7 @@ class ScoutingRotation:
                 counted_limit -= 1
 
     def weight_loop_down(self, looping_team: int, idx_min: int):
-        if not self.entries_count[looping_team] < self.scouted_match_limit:
+        if not self.scouted_matches_count[looping_team] < self.scouted_match_limit:
             return
         idx = idx_min
         counted_limit = self.scouted_match_limit
@@ -196,11 +203,38 @@ class ScoutingRotation:
             for i, weight in enumerate(self.weighted_schedule[match]):
                 self.weighted_schedule[match][i] = min(weight, normal_max)
 
-    def calculate_weights(self):
+    def calculate_weighted_schedule(self):
         self.weight_priorities()
         self.weight_backwards()
         self.weight_forwards()
         self.normalize_weights()
+
+    def calculate_distribution_schedule(self):
+        self.assert_weights()
+        self.reset_distribution_schedule()
+        for team in self.teams_set:
+            assigned_matches_count = self.scouted_matches_count[team]
+            extra_entries = self.entries_limit - assigned_matches_count
+            team_max_weight = 0
+            for match in self.sorted_matches:
+                if team in self.schedule[match]:
+                    i = self.schedule[match].index(team)
+                    position_weight = self.weighted_schedule[match][i]
+                    if position_weight > 0:
+                        if position_weight > team_max_weight:
+                            team_max_weight = position_weight
+                        self.distribution_schedule[match][i] += 1
+            while extra_entries > 0:
+                any_equals = False
+                for match in self.sorted_matches:
+                    if team in self.schedule[match]:
+                        i = self.schedule[match].index(team)
+                        position_weight = self.weighted_schedule[match][i]
+                        if position_weight == 0:
+                            if position_weight > team_max_weight:
+                                team_max_weight = position_weight
+                            self.distribution_schedule[match][i] += 1
+                extra_entries -= 1
 
     def calculate_virtual_schedule(self):
         self.assert_weights()
@@ -227,11 +261,13 @@ if __name__ == '__main__':
     sys.path.append("C:/Users/Yu/PycharmProjects/w7py/tests")
     qms = __import__("iri_qms").iri_qms
     r = ScoutingRotation(qms)
-    r.set_available(6, 1)
+    r.set_available(30, 0.5)
     r.set_priority_teams([865])
-    r.calculate_weights()
+    r.calculate_weighted_schedule()
     r.debug_weights()
     r.debug_matches_scouted_count()
     r.debug_weighted_percentage()
-    r.calculate_virtual_schedule()
-    r.debug_virtual_scout_count()
+    r.calculate_distribution_schedule()
+    r.debug_distribution_schedule()
+    # r.calculate_virtual_schedule()
+    # r.debug_virtual_scout_count()
